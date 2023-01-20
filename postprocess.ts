@@ -8,8 +8,8 @@ try {
     if (xmlfile) {
         // Gets contents xmlfile as a string. We need this because parseFeed accepts a string as input. 
         const xml:string = await readTXT(xmlfile);
-        const parsed_feed = await parseFeed(xml)
-        await writeJSON('data.json', parsed_feed
+        const parsed_feed = await parseFeed(xml);
+        await writeJSON('data.json', parsed_feed)
     }  
 } catch (error) {
     console.log(error)
