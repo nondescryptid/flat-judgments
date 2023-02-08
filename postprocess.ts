@@ -22,8 +22,8 @@ try {
     // Trims everything after the last '-' - thanks OGP
     const blacklistChars = /[^A-Za-z0-9-()_+&@,\s]/g
     const itemTitle: string[] = item.title.value.split('-')
-    let fileName = itemTitle.pop().trim().replace(/ /g, '_')
-    fileName = fileName.replace(blacklistChars, '')
+    let fileName = itemTitle?.pop()?.trim().replace(/ /g, '_')
+    fileName = fileName?.replace(blacklistChars, '')
 
     // Check if file already exists
     try {
