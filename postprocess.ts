@@ -3,6 +3,7 @@
 import { readTXT, readJSON, writeJSON, writeTXT } from 'https://deno.land/x/flat/mod.ts'
 import { parseFeed } from "https://deno.land/x/rss/mod.ts"
 import * as cheerio from "https://esm.sh/cheerio@1.0.0-rc.12"
+import { assert } from "https://deno.land/std@0.177.0/testing/asserts.ts"
 
 const DATA_XML = "data.xml"
 const DATA_JSON = "data.json"
@@ -17,7 +18,9 @@ const readXML = async (xmlFile = DATA_XML): Promise<string> => {
 
 const processHTML = (html: string): string => {
   const $ = cheerio.load(html)
-  return html
+  const rootElement = $(`#mlContent > root`)
+  // TODO: replace hrefs
+  return `<html>${rootElement.html()}</html>`
 }
 
 const writeHTML = async (item: { id: string|URL|Request; title: { value: string; }; }) => {
@@ -38,7 +41,7 @@ const writeHTML = async (item: { id: string|URL|Request; title: { value: string;
     assert(fileInfo.isFile)
   } catch(e) {
     if (e instanceof Deno.errors.NotFound) {
-        writeTXT(`./cases/${fileName}.html`, responseHTML)
+        writeTXT(`./cases/${fileName}.html`, fileContent)
     } else {
       throw e
     }
@@ -47,9 +50,7 @@ const writeHTML = async (item: { id: string|URL|Request; title: { value: string;
 
 try {
   const data = await readXML()
-
-  await Promise.all(data.entries.map(writeHTML))
-    
+  await Promise.all(data.entries.map(writeHTML))    
 } catch (error) {
   console.log(error)
 }
