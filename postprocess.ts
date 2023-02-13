@@ -1,18 +1,16 @@
-// The Flat Data postprocessing libraries can be found at https://deno.land/x/flat/mod.ts
-// Replace 'x' with latest library version
-import { readTXT, readJSON, writeJSON, writeTXT } from 'https://deno.land/x/flat/mod.ts'
-import { parseFeed } from "https://deno.land/x/rss/mod.ts"
+import { readTXT, writeJSON, writeTXT } from 'https://deno.land/x/flat@0.0.15/mod.ts'
+import { parseFeed, Feed } from "https://deno.land/x/rss@0.5.7/mod.ts"
 import * as cheerio from "https://esm.sh/cheerio@1.0.0-rc.12"
 import { assert } from "https://deno.land/std@0.177.0/testing/asserts.ts"
 
 const DATA_XML = "data.xml"
 const DATA_JSON = "data.json"
 
-const readXML = async (xmlFile = DATA_XML): Promise<string> => {
+const readXML = async (xmlFile = DATA_XML): Promise<Feed> => {
   // Gets contents xmlFile as a string. We need this because parseFeed accepts a string as input. 
-  const xml:string = await readTXT(xmlfile);
+  const xml:string = await readTXT(xmlFile)
   const parsedFeed = await parseFeed(xml)
-  writeJSON(DATA_JSON, parsed_feed)
+  writeJSON(DATA_JSON, parsedFeed)
   return parsedFeed
 }
 
@@ -23,7 +21,14 @@ const processHTML = (html: string): string => {
   return `<html>${rootElement.html()}</html>`
 }
 
-const writeHTML = async (item: { id: string|URL|Request; title: { value: string; }; }) => {
+interface Item {
+  id: string|URL|Request,
+  title: {
+    value: string,
+  },
+}
+
+const writeHTML = async (item: Item) => {
   // Get links
   const response = await fetch(item.id);
   const responseHTML = await response.text();
@@ -50,7 +55,7 @@ const writeHTML = async (item: { id: string|URL|Request; title: { value: string;
 
 try {
   const data = await readXML()
-  await Promise.all(data.entries.map(writeHTML))    
+  await Promise.all(data.entries.map(feedItem => writeHTML(feedItem as Item)))    
 } catch (error) {
   console.log(error)
 }
